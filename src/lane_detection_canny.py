@@ -38,8 +38,6 @@ def callback(data):
 		ignore_mask_color = 255
 
 		
-
-
 	image = bridge.cv2_to_imgmsg(canny, "mono8")
 	pub_image.publish(image)
 
