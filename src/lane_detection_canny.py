@@ -37,8 +37,23 @@ def callback(data):
 	else:
 		ignore_mask_color = 255
 
+
+
+	if len(img.shape) > 2:
+		channel_count = img.shape[2]
+		ignore_mask_color = (255,) * channel_count
+	else:
+		ignore_mask_color = 255
+	imshape = img.shape
+	vertices = np.array([[(0, 300),
+						(150, 150),
+						(250, 150),
+						(imshape[1], 350)]], dtype=np.int32)
+
+	cv2.fillPoly(mask, vertices, ignore_mask_color)
+
 		
-	image = bridge.cv2_to_imgmsg(canny, "mono8")
+	image = bridge.cv2_to_imgmsg(mask)
 	pub_image.publish(image)
 
 def lane_detection():

@@ -11,6 +11,45 @@ using namespace std;
 
 image_transport::Publisher pub;  // Declare the publisher as a global variable
 
+
+cv::Mat& get_pxl_at(cv::Mat& img){
+    Vec3b color_1 = img.at<Vec3b>(Point(100, 100));
+
+    /*-----------------픽셀의 색깔 데이터 가져오기 (at)------------------ */ 
+    for (int i = 0; i < 3; i++) {
+        cout << int(color_1.val[i]) << " ";
+    }
+    //return img;
+}
+
+cv::Mat& get_pxl_ptr(cv::Mat& img){
+    uchar* color_2 = img.ptr<uchar>(100);
+
+    for (int i = 0; i < 3; i++) {
+        cout << int(color_2[100 * 3 + i]) << " ";
+    }
+}
+
+cv::Mat& get_pxl_data(cv::Mat& img){
+    
+    uchar* color_3 = img.data;
+
+    for (int i = 0; i < 3; i++) {
+        cout << int(color_3[100 * 3 * img.cols + 100 * 3 + i]) << " ";
+    }
+}
+
+cv::Mat& put_pxl(cv::Mat& img){
+    /*---------------------- 픽셀의 색깔 데이터 변경하기 ------------------ */ 
+    for (int y = 90; y < 105; y++) {
+        for (int x = 90; x < 105; x++) {
+            img.at<Vec3b>(Point(y, x)) = Vec3b(0, 0, 0);
+        }
+    }
+
+    return img;
+}
+
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
     try
@@ -18,38 +57,39 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         cv::Mat image = cv_bridge::toCvShare(msg, "bgr8")->image;
         // Here, you can process the image as you need...
         cout << "| at | ";
-        Vec3b color_1 = image.at<Vec3b>(Point(100, 100));
+        get_pxl_at(image);
 
-        // 픽셀의 색깔 데이터 가져오기 (at)
-        for (int i = 0; i < 3; i++) {
-            cout << int(color_1.val[i]) << " ";
-        }
-        // cout << endl;
-
-        // 픽셀의 색깔 데이터 가져오기 (ptr)
         cout << "| ptr | ";
-        uchar* color_2 = image.ptr<uchar>(100);
+        get_pxl_ptr(image);
 
-        for (int i = 0; i < 3; i++) {
-            cout << int(color_2[100 * 3 + i]) << " ";
-        }
-        //cout << endl;
-
-        // 픽셀의 색깔 데이터 가져오기 (data)
         cout << "| data | ";
-        uchar* color_3 = image.data;
+        get_pxl_data(image);
 
-        for (int i = 0; i < 3; i++) {
-            cout << int(color_3[100 * 3 * image.cols + 100 * 3 + i]) << " ";
-        }
+
         cout << endl;
 
 
-        // 픽셀의 색깔 데이터 변경하기 
-        for (int y = 90; y < 105; y++) {
-            for (int x = 90; x < 105; x++) {
-                image.at<Vec3b>(Point(y, x)) = Vec3b(0, 0, 0);
-            }
+        /*---------------------- 픽셀의 색깔 데이터 변경하기 ------------------ */ 
+        // for (int y = 90; y < 105; y++) {
+        //     for (int x = 90; x < 105; x++) {
+        //         image.at<Vec3b>(Point(y, x)) = Vec3b(0, 0, 0);
+        //     }
+        // }
+
+        //cv::line(image, cv::Point(0, 0), cv::Point(image.cols - 1, image.rows - 1), cv::Scalar(0, 255, 0), 2);
+        //cv::line(image, cv::Point(0, image.rows - 1), cv::Point(image.cols - 1, 0), cv::Scalar(0, 255, 0), 2);
+
+        // for (int y = 0; y < image.rows; y++) {
+        //     for (int x = 0; x < image.cols; x++) {
+        //         if (y==x)
+        //             image.at<Vec3b>(Point(y, x)) = Vec3b(0, 0, 0);
+        //     }
+        // }
+        for (int y = 1; y < image.rows; y++){
+            int x = image.cols * (y-image.rows) / image.rows;
+            image.at<Vec3b>(Point(x, y)) = Vec3b(0, 0, 255);
+            image.at<Vec3b>(Point(x+1, y)) = Vec3b(0, 0, 255);
+            image.at<Vec3b>(Point(x+2, y)) = Vec3b(0, 0, 255);
         }
 
         sensor_msgs::ImagePtr output_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image).toImageMsg();
